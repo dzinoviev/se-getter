@@ -14,12 +14,16 @@ import networkx as nx
 SITE = "www.stackoverflow.com"
 
 def catch_and_cache(downloader, pickle_filename, depth=10000):
-    try: # Has the data block been cached?
-        sys.setrecursionlimit(depth) # Avoid stack overflows
+    # Has the data block been cached?
+    try:
+        # Avoid stack overflows
+        sys.setrecursionlimit(depth)
         with open(pickle_filename, "rb") as infile:
             data = pickle.load(infile)
-    except FileNotFoundError: # The block was not cached
-        data = downloader()   # Fetch it, cache it
+    # The block was not cached
+    except FileNotFoundError:
+        # Fetch it, cache it
+        data = downloader()
         with open(pickle_filename, "wb") as outfile:
             pickle.dump(data, outfile)
     return data
@@ -52,7 +56,7 @@ def get_question_tags():
     seen = set() # All processed questions
     for i, tag in enumerate(popular_tags, 1):
         # Progress reporting
-        print("{} ({} of {})".format(tag, i, len(popular_tags))) 
+        print("{} ({} of {})".format(tag, i, len(popular_tags)))
         for how in "newest", "frequent":
             for page in range(1, 1 + TAG_PAGES):
                 try:
