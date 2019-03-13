@@ -11,7 +11,7 @@ from bs4 import BeautifulSoup as bs
 import networkx as nx
 
 # Modify the site name, as needed
-SITE = "www.stackoverflow.com"
+SITE = "stackoverflow.com"
 
 def catch_and_cache(downloader, pickle_filename, depth=10000):
     # Has the data block been cached?
@@ -79,8 +79,13 @@ def get_question_tags():
     return question_tags
 
 # Download the data
-print("Downloading the popular tags")
-popular_tags = catch_and_cache(get_popular_tags, "tags-{}.p".format(SITE))
+try:
+    with open("TAGS") as tagfile:
+        print("Reading popular tags")
+        popular_tags = tagfile.read().split()
+except:
+    print("Downloading the popular tags")
+    popular_tags = catch_and_cache(get_popular_tags, "tags-{}.p".format(SITE))
 print("Downloading the questions")
 question_tags = catch_and_cache(get_question_tags, "data-{}.p".format(SITE))
 
