@@ -84,9 +84,9 @@ try:
         print("Reading popular tags")
         popular_tags = tagfile.read().split()
 except:
-    print("Downloading the popular tags")
+    print("Obtaining the popular tags")
     popular_tags = catch_and_cache(get_popular_tags, "tags-{}.p".format(SITE))
-print("Downloading the questions")
+print("Obtaining the questions")
 question_tags = catch_and_cache(get_question_tags, "data-{}.p".format(SITE))
 
 # Build the network
@@ -108,7 +108,8 @@ if len(G) > NODE_LIMIT:
     G = nx.subgraph(G, [k for k, v in dict(nx.degree(G)).items()
                         if v >= NODE_SLICING_THRESHOLD])
 
-nx.set_node_attributes(G, popular_tags, "s")
+if isinstance(popular_tags, dict):
+    nx.set_node_attributes(G, popular_tags, "s")
 nx.set_node_attributes(G, nx.eigenvector_centrality(G), "eig")
 
 # Is community detections possible?
