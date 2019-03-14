@@ -2,6 +2,7 @@ import time
 import pickle
 import sys
 import csv
+import os
 from itertools import chain, combinations, groupby
 from collections import Counter
 from urllib.request import urlopen
@@ -11,7 +12,7 @@ from bs4 import BeautifulSoup as bs
 import networkx as nx
 
 # Modify the site name, as needed
-SITE = "stackoverflow.com"
+SITE = "stats.stackexchange.com"
 
 def catch_and_cache(downloader, pickle_filename, depth=10000):
     # Has the data block been cached?
@@ -78,6 +79,10 @@ def get_question_tags():
                 seen |= unseen
     return question_tags
 
+# Make space for results
+if not os.path.isdir(SITE):
+    os.mkdir(SITE)
+
 # Download the data
 try:
     with open("TAGS") as tagfile:
@@ -85,9 +90,10 @@ try:
         popular_tags = tagfile.read().split()
 except:
     print("Obtaining the popular tags")
-    popular_tags = catch_and_cache(get_popular_tags, "tags-{}.p".format(SITE))
+    popular_tags = catch_and_cache(get_popular_tags, "{}/tags.p".format(SITE))
+
 print("Obtaining the questions")
-question_tags = catch_and_cache(get_question_tags, "data-{}.p".format(SITE))
+question_tags = catch_and_cache(get_question_tags, "{}/data.p".format(SITE))
 
 # Build the network
 EDGE_SLICING_THRESHOLD = 6
@@ -117,7 +123,7 @@ try:
     import community
 except ModuleNotFoundError:
     print("Run pip install python-louvain' to enable community detection")
-    nx.write_graphml(G, "map-{}.graphml".format(SITE))
+    nx.write_graphml(G, "{}/map.graphml".format(SITE))
     sys.exit()
 
 parts = community.best_partition(G)
@@ -130,7 +136,7 @@ top = [[k for k, w in sorted(v, key=lambda n: n[1].get("s", 0),
        for k, v in groupby(sorted(dict(G.nodes(data=True)).items(),
                                   key=lambda n: n[1]["part"]),
                            key=lambda n: n[1]["part"])]
-with open("top-{}.csv".format(SITE), "w") as csvout:
+with open("{}/top.csv".format(SITE), "w") as csvout:
     writer = csv.writer(csvout)
     writer.writerows(top)
 
@@ -150,5 +156,5 @@ I = nx.relabel_nodes(I, labels)
 I.remove_edges_from(list(nx.selfloop_edges(I)))
 
 # Save the results
-nx.write_graphml(G, "map-{}.graphml".format(SITE))
-nx.write_graphml(I, "induced-{}.graphml".format(SITE))
+nx.write_graphml(G, "{}/map.graphml".format(SITE))
+nx.write_graphml(I, "{}/induced.graphml".format(SITE))
