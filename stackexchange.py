@@ -11,8 +11,12 @@ from urllib.error import HTTPError
 from bs4 import BeautifulSoup as bs
 import networkx as nx
 
-# Modify the site name, as needed
-SITE = "stats.stackexchange.com"
+if len(sys.argv) < 2:
+    print("USAGE: {} site-name".format(sys.argv[0]))
+    sys.exit()
+else:
+    SITE = sys.argv[1]
+    print("Processing {}".format(SITE))
 
 def catch_and_cache(downloader, pickle_filename, depth=10000):
     # Has the data block been cached?
